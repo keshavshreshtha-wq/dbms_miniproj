@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import sqlite3
 
 app = FastAPI(title="Navcore Heatwave API")
 
+# Allow all origins for frontend connections
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,6 +17,11 @@ def get_db_connection():
     conn = sqlite3.connect('navcore_heatwave.db')
     conn.row_factory = sqlite3.Row
     return conn
+
+# Root route to serve the command center UI
+@app.get("/")
+def serve_frontend():
+    return FileResponse("index.html")
 
 @app.get("/api/summary")
 def get_region_summary():
@@ -37,7 +44,6 @@ def get_hotspots():
     conn.close()
     return [dict(row) for row in data]
 
-# NEW FEATURE: Role-based data retrieval
 @app.get("/api/alerts/{stakeholder}")
 def get_stakeholder_alerts(stakeholder: str):
     conn = get_db_connection()

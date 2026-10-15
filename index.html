@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .brand {
+            padding: 0 24px 20px 24px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-dot {
+            width: 10px; height: 10px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .nav-label {
+            padding: 0 24px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover { background-color: rgba(255,255,255,0.05); color: var(--text-main); }
+        .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { margin: 0; font-size: 28px; }
+        .header p { margin: 5px 0 0 0; color: var(--text-muted); }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .grid-full { display: grid; grid-template-columns: 1fr; gap: 24px; }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+        }
+
+        .card h2 { margin: 0 0 20px 0; font-size: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 12px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: rgba(255,255,255,0.02); }
+
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-danger { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-warning { background-color: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-clear { background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .temp-high { color: #fca5a5; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="brand">
+            <div class="brand-dot"></div>
+        </div>
+        
+        <div class="nav-label">User Portals</div>
+        <div class="nav-item active" onclick="switchView('public', this)">Public Dashboard</div>
+        <div class="nav-item" onclick="switchView('disaster', this)">Disaster Management</div>
+        <div class="nav-item" onclick="switchView('admin', this)">System Admin (All Data)</div>
+    </div>
+
+    <!-- Main Dashboard Area -->
+    <div class="main-content">
+        
+        <div class="header">
+            <div>
+                <h1 id="view-title">Public Citizen Portal</h1>
+                <p id="view-desc">General region summaries and active warnings.</p>
+            </div>
+            <div style="text-align: right; color: var(--text-muted); font-size: 14px;">
+                Live Connection • <span id="clock" style="color: var(--accent);"></span>
+            </div>
+        </div>
+
+        <!-- 1. PUBLIC VIEW -->
+        <div id="view-public" class="view-section active grid">
+            <div class="card">
+                <h2>Region Alert Summary</h2>
+                <table>
+                    <thead><tr><th>Region</th><th>Peak Temp</th><th>Active Alerts</th></tr></thead>
+                    <tbody id="summary-body"><tr><td colspan="3">Loading...</td></tr></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h2>General Advisories</h2>
+                <table>
+                    <thead><tr><th>Location</th><th>Current Temp</th><th>Status</th></tr></thead>
+                    <tbody id="public-alerts-body"><tr><td colspan="3">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. DISASTER MANAGEMENT VIEW -->
+        <div id="view-disaster" class="view-section grid-full">
+            <div class="card" style="border-top: 3px solid var(--danger);">
+                <h2 style="color: var(--danger);">Critical Severe Hotspots (>40°C)</h2>
+                <table>
+                    <thead><tr><th>Time</th><th>Region</th><th>Sensor Type</th><th>Recorded Temp</th><th>Advisory Action</th></tr></thead>
+                    <tbody id="hotspots-body"><tr><td colspan="5">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. ADMIN VIEW -->
+        <div id="view-admin" class="view-section grid-full">
+            <div class="card">
+                <h2>Raw System Feed (All Stakeholders)</h2>
+                <table>
+                    <thead><tr><th>Time</th><th>Target User</th><th>Region</th><th>Forecast vs Actual</th><th>Status</th></tr></thead>
+                    <tbody id="admin-body"><tr><td colspan="5">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000';
+
+        // Live Clock
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-IN');
+        }, 1000);
+
+        function getBadge(status) {
+            if (['Danger', 'Severe', 'Medical Emergency'].includes(status)) return 'badge-danger';
+            if (['Watch', 'Warning', 'Moderate', 'Hydration', 'Stay Indoors'].includes(status)) return 'badge-warning';
+            return 'badge-clear';
+        }
+
+        function formatTime(isoStr) {
+            return new Date(isoStr).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+        }
+
+        // View Switcher Logic
+        function switchView(viewName, element) {
+            // Update Active Tab
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Update View Containers
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            // Update Header Text & Fetch Data
+            if(viewName === 'public') {
+                document.getElementById('view-title').innerText = 'Public Citizen Portal';
+                document.getElementById('view-desc').innerText = 'General region summaries and active warnings.';
+                loadPublicData();
+            } else if (viewName === 'disaster') {
+                document.getElementById('view-title').innerText = 'Disaster Management Command';
+                document.getElementById('view-desc').innerText = 'Tracking critical emergencies and actionable hotspots.';
+                loadDisasterData();
+            } else if (viewName === 'admin') {
+                document.getElementById('view-title').innerText = 'System Administrator';
+                document.getElementById('view-desc').innerText = 'Raw datastream for all roles and forecasts.';
+                loadAdminData();
+            }
+        }
+
+        // Fetch Functions
+        function loadPublicData() {
+            fetch(`${API}/api/summary`).then(res => res.json()).then(data => {
+                const tb = document.getElementById('summary-body'); tb.innerHTML = '';
+                data.forEach(r => tb.innerHTML += `<tr><td>${r.region}</td><td class="temp-high">${r.max_temp.toFixed(1)}°C</td><td><span class="badge ${r.total_alerts > 0 ? 'badge-danger' : 'badge-clear'}">${r.total_alerts} Alerts</span></td></tr>`);
+            });
+            fetch(`${API}/api/alerts/Public_Dashboard_User`).then(res => res.json()).then(data => {
+                const tb = document.getElementById('public-alerts-body'); tb.innerHTML = '';
+                data.slice(0,6).forEach(r => tb.innerHTML += `<tr><td>${r.region}</td><td>${r.recorded_temp_c}°C</td><td><span class="badge ${getBadge(r.alert_status)}">${r.alert_status}</span></td></tr>`);
+            });
+        }
+
+        function loadDisasterData() {
+            fetch(`${API}/api/hotspots`).then(res => res.json()).then(data => {
+                const tb = document.getElementById('hotspots-body'); tb.innerHTML = '';
+                data.forEach(r => tb.innerHTML += `<tr><td style="color:#94a3b8">${formatTime(r.timestamp)}</td><td>${r.region}</td><td>${r.station_type}</td><td class="temp-high">${r.recorded_temp_c}°C</td><td><span class="badge ${getBadge(r.advisory_category)}">${r.advisory_category}</span></td></tr>`);
+            });
+        }
+
+        function loadAdminData() {
+            fetch(`${API}/api/alerts/Admin`).then(res => res.json()).then(data => {
+                const tb = document.getElementById('admin-body'); tb.innerHTML = '';
+                data.forEach(r => tb.innerHTML += `<tr><td style="color:#94a3b8; font-size:12px;">${formatTime(r.timestamp)}</td><td style="font-weight:500;">${r.stakeholder_target}</td><td>${r.region}</td><td><span style="color:#94a3b8">F: ${r.forecast_temp_c}°C</span> / <span class="temp-high">A: ${r.recorded_temp_c}°C</span></td><td><span class="badge ${getBadge(r.alert_status)}">${r.alert_status}</span></td></tr>`);
+            });
+        }
+
+        // Initial Load
+        loadPublicData();
+    </script>
+</body>
+</html>
